@@ -78,6 +78,7 @@ func setEnv(env []string) {
 }
 
 func runEtcd(ctx context.Context, args []string) {
+	args = append(args, "--log-package-levels=*=N")
 	os.Args = args
 	logrus.Info("Running ", strings.Join(args, " "))
 	etcdmain.Main()
