@@ -71,7 +71,7 @@ def optimal_version_dir(rancher_version, service_dir):
             if os.path.isfile(rancher_compose_filepath):
                 try:
                     with file(rancher_compose_filepath, 'r') as f:
-                        rancher_compose = yaml.load(f)
+                        rancher_compose = yaml.load(f, Loader=yaml.FullLoader)
                         version_dirs[service_version_dir] = rancher_compose
                 except yaml.YAMLError, exc:
                     print "Error in rancher-compose.yml file: ", exc
@@ -98,12 +98,16 @@ def optimal_version_dir(rancher_version, service_dir):
     # Bail out if only one remains
     if len(filtered) == 1:
         for key, value in filtered.iteritems():
-            return key, value['.catalog']['version']
+            if '.catalog' in value:
+              return key, value['.catalog']['version']
+            else:
+              return key, value['catalog']['version']
+
         return list(filtered)[0]
 
     # Try to return the template version in config.yml
     try:
-        template_config = yaml.load(file(service_dir + "/config.yml", 'r'))
+        template_config = yaml.load(file(service_dir + "/config.yml", 'r'), Loader=yaml.FullLoader)
         if 'version' in template_config:
             version = template_config['version']
             for key, value in filtered.iteritems():
@@ -185,7 +189,7 @@ def version_images(service_version_dir):
         return images
 
     try:
-        docker_compose = yaml.load(filedata)
+        docker_compose = yaml.load(filedata, Loader=yaml.FullLoader)
         # handle v1/v2 docker-compose
         services = docker_compose
         if 'services' in services:
