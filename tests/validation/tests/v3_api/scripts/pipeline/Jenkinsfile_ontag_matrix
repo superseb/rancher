@@ -14,6 +14,8 @@ def rancher_version() {
   error()
 }
 
+def network_providers = ["canal", "calico", "flannel", "weave"]
+
 def lastBuildResult() {
  def previous_build = currentBuild.getPreviousBuild()
   if ( null != previous_build ) { return previous_build.result } else { return 'UNKNOWN' }
@@ -45,6 +47,7 @@ if ( true == via_webhook() && (!(rancher_version ==~ rancher_version_regex)) ) {
   if (env.BRANCH) {
     branch = "${BRANCH}"
   }
+  branch = "test_cni"
   try {
     node {
       def rootPath = "/src/rancher-validation/"
@@ -160,10 +163,15 @@ if ( true == via_webhook() && (!(rancher_version ==~ rancher_version_regex)) ) {
                                 string(name: 'BRANCH', value: branch) ]
 
                     // Rancher server 1 is used to test RKE clusters
-                    jobs["do"] = { build job: 'rancher-v3_ontag_do_certification', parameters: params }
-                    jobs["ec2"] = { build job: 'rancher-v3_ontag_ec2_certification', parameters: params }
-                    jobs["az"] = { build job: 'rancher-v3_ontag_az_certification', parameters: params }
-                    jobs["custom"] = { build job: 'rancher-v3_ontag_custom_certification', parameters: params}
+                    // Make sure every network provider is tested
+                    network_providers.each() {
+                      network_provider = string(name: 'RANCHER_NETWORK_PROVIDER', value: "${it}")
+                      params << network_provider
+                      jobs["do_${it}"] = { build job: 'rancher-v3_ontag_do_certification', parameters: params }
+                      jobs["ec2_${it}"] = { build job: 'rancher-v3_ontag_ec2_certification', parameters: params }
+                      jobs["az_${it}"] = { build job: 'rancher-v3_ontag_az_certification', parameters: params }
+                      jobs["custom_${it}"] = { build job: 'rancher-v3_ontag_custom_certification', parameters: params}
+                    }
 
                     // Rancher server 2 is used to test GKE, EKS, AKS and Imported clusters
                     jobs["gke"] = { build job: 'rancher-v3_ontag_gke_certification', parameters: params2 }

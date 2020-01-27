@@ -15,6 +15,7 @@ AZURE_CLIENT_SECRET = os.environ.get("AZURE_CLIENT_SECRET")
 AZURE_TENANT_ID = os.environ.get("AZURE_TENANT_ID")
 worker_count = int(os.environ.get('RANCHER_STRESS_TEST_WORKER_COUNT', 1))
 HOST_NAME = os.environ.get('RANCHER_HOST_NAME', "testcustom")
+NETWORK_PROVIDER = os.environ.get('RANCHER_NETWORK_PROVIDER', "canal")
 
 engine_install_url = "https://releases.rancher.com/install-docker/18.09.sh"
 
@@ -31,9 +32,7 @@ rke_config = {
         {"provider": "metrics-server",
          "type": "monitoringConfig"},
     "network":
-        {"plugin": "canal",
-         "type": "networkConfig",
-         "options": {"flannelBackendType": "vxlan"}},
+        {"type": "networkConfig", "plugin": NETWORK_PROVIDER},
     "services": {
         "etcd": {
             "extraArgs":

@@ -6,9 +6,10 @@ HOST_COUNT = int(os.environ.get('RANCHER_HOST_COUNT', 1))
 HOST_NAME = os.environ.get('RANCHER_HOST_NAME', "testsa")
 RANCHER_SERVER_VERSION = os.environ.get('RANCHER_SERVER_VERSION',
                                         "master-head")
+NETWORK_PROVIDER = os.environ.get('RANCHER_NETWORK_PROVIDER', "canal")
 rke_config = {"authentication": {"type": "authnConfig", "strategy": "x509"},
               "ignoreDockerVersion": False,
-              "network": {"type": "networkConfig", "plugin": "canal"},
+              "network": {"type": "networkConfig", "plugin": NETWORK_PROVIDER},
               "type": "rancherKubernetesEngineConfig"
               }
 AUTO_DEPLOY_CUSTOM_CLUSTER = ast.literal_eval(
