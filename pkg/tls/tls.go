@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/rancher/dynamiclistener"
@@ -69,6 +70,8 @@ func SetupListener(secrets v1.SecretController, acmeDomains []string, noCACerts 
 	}
 
 	if settings.CACerts.Get() != caForAgent {
+		// Remove any leading or trailing newlines fom CA certificate which causes issues when comparing cacerts settings vs CATTLE_CA_CHECKSUM in the agent
+		caForAgent = strings.TrimSpace(caForAgent)
 		if err := settings.CACerts.Set(caForAgent); err != nil {
 			return nil, err
 		}
