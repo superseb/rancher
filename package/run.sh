@@ -219,6 +219,8 @@ CATTLE_SERVER_PING="${CATTLE_SERVER}/ping"
 err=$(check_url $CATTLE_SERVER_PING)
 if [[ $err ]]; then
     error "${CATTLE_SERVER_PING} is not accessible (${err})"
+    # Show full response headers for debug
+    curl -s -D - -o /dev/null $CATTLE_SERVER_PING
     exit 1
 else
     info "${CATTLE_SERVER_PING} is accessible"
