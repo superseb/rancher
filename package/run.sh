@@ -204,15 +204,6 @@ if grep -E -q '^nameserver 127.*.*.*|^nameserver localhost|^nameserver ::1' /etc
     warn "Loopback address found in /etc/resolv.conf, please refer to the documentation how to configure your cluster to resolve DNS properly"
 fi
 
-CATTLE_SERVER_PING="${CATTLE_SERVER}/ping"
-err=$(check_url $CATTLE_SERVER_PING)
-if [[ $err ]]; then
-    error "${CATTLE_SERVER_PING} is not accessible (${err})"
-    exit 1
-else
-    info "${CATTLE_SERVER_PING} is accessible"
-fi
-
 # Extract hostname from URL
 CATTLE_SERVER_HOSTNAME=$(echo $CATTLE_SERVER | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/')
 CATTLE_SERVER_HOSTNAME_WITH_PORT=$(echo $CATTLE_SERVER | sed -e 's/[^/]*\/\/\([^@]*@\)\?\(.*\).*/\2/')
@@ -223,6 +214,16 @@ RESOLVED_ADDR=$(getent ahostsv4 $CATTLE_SERVER_HOSTNAME | sed -n 's/ *STREAM.*//
 if [ "${CATTLE_SERVER_HOSTNAME}" != "${RESOLVED_ADDR}" ]; then
   info "${CATTLE_SERVER_HOSTNAME} resolves to $(echo $RESOLVED_ADDR)"
 fi
+
+CATTLE_SERVER_PING="${CATTLE_SERVER}/ping"
+err=$(check_url $CATTLE_SERVER_PING)
+if [[ $err ]]; then
+    error "${CATTLE_SERVER_PING} is not accessible (${err})"
+    exit 1
+else
+    info "${CATTLE_SERVER_PING} is accessible"
+fi
+
 
 if [ -n "$CATTLE_CA_CHECKSUM" ]; then
     temp=$(mktemp)
